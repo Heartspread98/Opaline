@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 
 from make_repo import ar_members
-from package_layout_test import PACKAGE, package, validate_app
+from package_layout_test import PACKAGE, ar, package, tar_gz, validate_app
 from verify_layout_repo import verify
 from pbzx_stream import decode
 
@@ -70,6 +70,24 @@ class DistributionTests(unittest.TestCase):
             self.assertNotIn("Conflicts:", control)
             self.assertNotIn("Replaces:", control)
             self.assertEqual(archive.getmember("postinst").mode, 0o755)
+        with tarfile.open(fileobj=io.BytesIO(members["data.tar.gz"]), mode="r:gz") as archive:
+            names = [member.name for member in archive.getmembers()]
+            self.assertEqual(names[:2], ["Applications", "Applications/OpalineLayoutTest.app"])
+            self.assertTrue(all(archive.getmember(name).isdir() for name in names[:2]))
+
+    def test_rejects_missing_directory_entries(self):
+        repo, deb = self.stage_repo()
+        members = dict(ar_members(deb.read_bytes()))
+        with tarfile.open(fileobj=io.BytesIO(members["data.tar.gz"]), mode="r:gz") as archive:
+            files = [(member.name, archive.extractfile(member).read(), member.mode)
+                     for member in archive.getmembers() if member.isfile()]
+        deb.write_bytes(ar([("debian-binary", members["debian-binary"]),
+                            ("control.tar.gz", members["control.tar.gz"]),
+                            ("data.tar.gz", tar_gz(files))]))
+        subprocess.run([sys.executable, str(HERE / "make_repo.py"), "--root", str(repo)],
+                       check=True, capture_output=True)
+        with self.assertRaisesRegex(ValueError, "missing directory entry"):
+            verify(repo)
 
     def test_rejects_original_bundle_and_scheme(self):
         for key, value in [("CFBundleIdentifier", "com.verback.YTLite"),
