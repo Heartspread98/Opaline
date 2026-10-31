@@ -3,8 +3,9 @@
 # Opaline Legacy (iOS 9 / armv7)
 
 > **Heartspread98 layout test branch:** [status, build and device test guide](docs/ios9-layout-test.md).
-> This branch contains an experimental fix. No modified iOS binary or device
-> playback result has been verified yet. The installation instructions below
+> This branch contains an experimental fix. A Windows-built armv7 test package
+> passed structural checks; device installation and playback remain unverified.
+> The installation instructions below
 > describe Joeviocoe's original release, not this test build.
 
 <picture>
