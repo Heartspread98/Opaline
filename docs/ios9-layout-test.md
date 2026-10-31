@@ -88,7 +88,7 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
 | Modified real armv7 .deb | built and structurally verified: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261031232052_iphoneos-arm.deb` (20,016,416 bytes; SHA256 `cb734a25b1af51fc688d4a8ae4f849c7889bfeafd4655125dbff30f92e24851a`) |
 | iPod / iPad install and playback | not tested |
-| Live Pages source and Cydia refresh | not published / not tested |
+| Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; all five repository endpoints returned HTTP 200, downloaded indexes and `.deb` matched expected hashes; device Cydia refresh not tested |
 
 The build used Apple Swift 5.4.2 and the iPhoneOS 14.5 SDK extracted from
 Xcode 12.5.1 into the Windows WSL build environment. A separate minimal UIKit
@@ -140,13 +140,14 @@ Mach-O architecture and transitive bundled runtime presence. After a genuine
 package exists, verify the complete tree before deploying it, add `.nojekyll`,
 and keep only intended test .debs in `debs/`.
 
-The intended project URL is `https://heartspread98.github.io/Opaline/`.
-**It is not a working test source until Pages has actually deployed these files.**
-Publish using a separate `gh-pages` branch or an explicit Pages workflow, never
-the inherited force-push script with its default remote. Check HTTP 200 for all
-three indexes, Release and each Filename URL, and compare downloaded bytes with
-Packages SHA256. Finally refresh in the device's Cydia and perform the above
-install checks. HTTP 200 on Windows does not prove iOS 9 TLS compatibility;
+The experimental project URL is `https://heartspread98.github.io/Opaline/`.
+It is deployed from a separate `gh-pages` branch. `Packages`, `Packages.gz`,
+`Packages.bz2`, `Release` and the referenced `.deb` returned HTTP 200 over HTTPS.
+The downloaded indexes matched the generated files; the downloaded package
+matched `Packages` SHA256. The published `Release` content matched after
+normalizing Windows line endings. The original force-push script with its
+default upstream remote was not run. Next refresh the source in the device's
+Cydia and perform the above install checks. HTTP 200 on Windows does not prove iOS 9 TLS compatibility;
 do not bypass certificate validation. This generates unsigned APT metadata;
 Release.gpg/InRelease require a separately managed signing key if desired.
 
@@ -154,5 +155,5 @@ GitHub Free supports public Pages repositories; this fork is public. Pages
 limits are 1 GB published size and a soft 100 GB/month bandwidth limit:
 [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
 Preserve the GPLv3 license and corresponding modified source when distributing
-Opaline binaries. No release or live Cydia source is implied by a passing CI
-distribution check.
+Opaline binaries. The live test source and local package checks do not establish
+that the app installs, launches, or plays video on either device.
