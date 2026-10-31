@@ -85,10 +85,18 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Source and screenshot inspection | complete |
 | Python distribution integration tests | 8 passed locally |
 | Python syntax, shell syntax, whitespace | passed locally |
-| Swift typecheck / armv7 compile / link | pending toolchain setup |
-| Modified real armv7 .deb | not produced yet |
+| Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
+| Modified real armv7 .deb | built and structurally verified: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261031232052_iphoneos-arm.deb` (20,016,416 bytes; SHA256 `cb734a25b1af51fc688d4a8ae4f849c7889bfeafd4655125dbff30f92e24851a`) |
 | iPod / iPad install and playback | not tested |
 | Live Pages source and Cydia refresh | not published / not tested |
+
+The build used Apple Swift 5.4.2 and the iPhoneOS 14.5 SDK extracted from
+Xcode 12.5.1 into the Windows WSL build environment. A separate minimal UIKit
+probe also typechecked and linked as a Mach-O armv7 executable. The package
+validator found an initially omitted weakly linked Swift MediaPlayer runtime;
+the bundling script was corrected and the complete build then passed. The
+local repository contains `Packages`, both compressed indexes, `Release` and
+the signed test `.deb`. These checks do not prove installation or playback.
 
 Run `python3 scripts/legacy/test_layout_distribution.py -v`. Its Mach-O files
 are **synthetic non-executable fixtures in temporary directories**, testing
