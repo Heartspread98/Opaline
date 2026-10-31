@@ -130,6 +130,8 @@ def main():
         "<!doctype html><meta charset=utf-8>"
         "<title>Opaline Legacy repo</title>"
         "<h1>Opaline &mdash; iOS 9 / armv7</h1>"
+        "<p>Experimental layout test build. Playback on an iOS 9 device is still unverified. "
+        "It installs separately from the original Opaline app.</p>"
         "<p>Add this URL as a source in Cydia or Sileo.</p>"
         f"<ul>\n{rows}\n</ul>\n", encoding="utf-8")
 
