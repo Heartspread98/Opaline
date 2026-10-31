@@ -44,7 +44,7 @@ def deps(path):
     out = []
     for _ in range(ncmds):
         cmd, size = struct.unpack_from('<2I', data, pointer)
-        if cmd == 0x0c:
+        if cmd in (0x0c, 0x80000018, 0x8000001f):
             offset, = struct.unpack_from('<I', data, pointer + 8)
             start = pointer + offset
             out.append(data[start:data.index(b'\0', start)].decode())
