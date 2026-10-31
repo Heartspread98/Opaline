@@ -26,7 +26,8 @@ VERSION="0.1.0~layout.$(date -u +%Y%m%d%H%M%S)"
 export BUNDLE_ID=com.heartspread98.opaline.layouttest
 export BUNDLE_DISPLAY_NAME="Opaline Test"
 export BUNDLE_URL_SCHEME=opaline-layout-test
-export BUNDLE_BUILD="$VERSION"
+export BUNDLE_BUILD="$(date -u +%Y%m%d%H%M%S)"
+export LAYOUT_PACKAGE_VERSION="$VERSION"
 export LAYOUT_TEST=1
 export ENTITLEMENTS="$REPO/scripts/legacy/LayoutTest.entitlements"
 bash "$REPO/scripts/legacy/build.sh"

@@ -108,6 +108,7 @@ def build_plist(app, version):
     plist["CFBundleIdentifier"] = BUNDLE_ID
     plist["CFBundleDisplayName"] = os.environ.get("BUNDLE_DISPLAY_NAME", "Opaline")
     if BUNDLE_ID != "com.verback.YTLite":
+        plist["OpalineLayoutPackageVersion"] = os.environ.get("LAYOUT_PACKAGE_VERSION", "")
         plist["CFBundleURLTypes"] = [{
             "CFBundleURLSchemes": [os.environ.get("BUNDLE_URL_SCHEME", "opaline-layout-test")]
         }]

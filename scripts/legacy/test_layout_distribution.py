@@ -1,6 +1,7 @@
 """Distribution integration tests with SYNTHETIC Mach-O fixtures, never real apps."""
 import importlib.util
 import io
+import lzma
 import plistlib
 import struct
 import subprocess
@@ -13,6 +14,7 @@ from pathlib import Path
 from make_repo import ar_members
 from package_layout_test import PACKAGE, package, validate_app
 from verify_layout_repo import verify
+from pbzx_stream import decode
 
 HERE = Path(__file__).resolve().parent
 VERSION = "0.1.0~layout.20261101"
@@ -42,7 +44,8 @@ class DistributionTests(unittest.TestCase):
         self.app = self.root / "staging/Opaline.app"
         self.app.mkdir(parents=True)
         self.info = {"CFBundleIdentifier": PACKAGE, "CFBundleExecutable": "Opaline",
-                     "CFBundleVersion": VERSION, "MinimumOSVersion": "9.3",
+                     "CFBundleVersion": "20261101080000", "OpalineLayoutPackageVersion": VERSION,
+                     "MinimumOSVersion": "9.3",
                      "UIRequiredDeviceCapabilities": ["armv7"],
                      "CFBundleURLTypes": [{"CFBundleURLSchemes": ["opaline-layout-test"]}]}
         self.save_info()
@@ -110,6 +113,22 @@ class DistributionTests(unittest.TestCase):
     def test_version_must_match_bundle(self):
         with self.assertRaises(ValueError):
             package(self.app, "0.1.1", self.root / "out")
+        self.info["CFBundleVersion"] = VERSION
+        self.save_info()
+        with self.assertRaises(ValueError):
+            package(self.app, VERSION, self.root / "out")
+
+    def test_pbzx_stream_and_truncation(self):
+        source = b"pbzx" + struct.pack(">Q", 1 << 24)
+        for flags, content in [(1 << 24, b"first"), (0, b"second")]:
+            chunk = lzma.compress(content)
+            source += struct.pack(">2Q", flags, len(chunk)) + chunk
+        output = io.BytesIO()
+        decode(io.BytesIO(source), output)
+        self.assertEqual(output.getvalue(), b"firstsecond")
+        for invalid in (b"wrong", source[:-4]):
+            with self.assertRaises((ValueError, lzma.LZMAError)):
+                decode(io.BytesIO(invalid), io.BytesIO())
 
     def test_bundle_generator_isolates_identity(self):
         spec = importlib.util.spec_from_file_location("make_bundle", HERE / "make_bundle.py")

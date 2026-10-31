@@ -121,8 +121,10 @@ def package(app, version, output):
     if not re.fullmatch(r"[0-9][A-Za-z0-9.+~]*", version):
         raise ValueError("invalid Debian version")
     info = validate_app(app)
-    if info.get("CFBundleVersion") != version:
+    if info.get("OpalineLayoutPackageVersion") != version:
         raise ValueError("bundle build stamp does not match package version")
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){0,2}", info.get("CFBundleVersion", "")):
+        raise ValueError("CFBundleVersion must be numeric, not a Debian prerelease string")
     files = []
     for path in sorted(app.rglob("*")):
         if path.is_file():
@@ -138,7 +140,7 @@ def package(app, version, output):
         "Author: Opaline contributors\n"
         "Homepage: https://github.com/Heartspread98/Opaline\n"
         "Description: Experimental iOS 9 player layout fix\n"
-        " Separate app and sandbox; device playback verification required.\n"
+        " Separate app and data paths; device playback verification required.\n"
     ).encode()
     refresh = b"#!/bin/sh\nuicache 2>/dev/null || true\nexit 0\n"
     raw = ar([("debian-binary", b"2.0\n"),

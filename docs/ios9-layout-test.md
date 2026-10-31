@@ -83,7 +83,7 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Check | Status |
 |---|---|
 | Source and screenshot inspection | complete |
-| Python distribution integration tests | 7 passed locally |
+| Python distribution integration tests | 8 passed locally |
 | Python syntax, shell syntax, whitespace | passed locally |
 | Swift typecheck / armv7 compile / link | pending toolchain setup |
 | Modified real armv7 .deb | not produced yet |

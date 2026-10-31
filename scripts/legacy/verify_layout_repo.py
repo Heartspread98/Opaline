@@ -82,7 +82,7 @@ def verify(root):
                         raise ValueError("executable permissions missing")
             app = stage / "Applications" / APP_DIR
             info = validate_app(app)
-            if info["CFBundleVersion"] != fields["Version"]:
+            if info["OpalineLayoutPackageVersion"] != fields["Version"]:
                 raise ValueError("bundle/package version mismatch")
         count += 1
     return count
