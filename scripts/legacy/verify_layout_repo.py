@@ -67,16 +67,32 @@ def verify(root):
         with tempfile.TemporaryDirectory() as directory:
             stage = Path(directory)
             with tarfile.open(fileobj=io.BytesIO(members["data.tar.gz"]), mode="r:gz") as archive:
+                seen_directories = set()
                 for member in archive.getmembers():
                     path = PurePosixPath(member.name)
-                    if path.parts[:2] != ("Applications", APP_DIR) or ".." in path.parts:
+                    if path.is_absolute() or not path.parts or ".." in path.parts:
                         raise ValueError("payload would touch another app")
-                    if not member.isfile():
-                        raise ValueError("unexpected payload member type")
                     if member.uid != 0 or member.gid != 0:
                         raise ValueError("payload must be root-owned")
                     dest = stage.joinpath(*path.parts)
-                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    if member.isdir():
+                        if (path.parts != ("Applications",)
+                                and path.parts[:2] != ("Applications", APP_DIR)):
+                            raise ValueError("payload directory would touch another app")
+                        if member.size != 0 or member.mode & 0o777 != 0o755:
+                            raise ValueError("invalid payload directory permissions")
+                        if path in seen_directories:
+                            raise ValueError("duplicate payload directory")
+                        if len(path.parts) > 1 and PurePosixPath(*path.parts[:-1]) not in seen_directories:
+                            raise ValueError("missing parent directory entry")
+                        dest.mkdir()
+                        seen_directories.add(path)
+                        continue
+                    if path.parts[:2] != ("Applications", APP_DIR) or not member.isfile():
+                        raise ValueError("unexpected payload member type/path")
+                    if any(PurePosixPath(*path.parts[:depth]) not in seen_directories
+                           for depth in range(1, len(path.parts))):
+                        raise ValueError("missing directory entry before file")
                     dest.write_bytes(archive.extractfile(member).read())
                     if dest.name == "Opaline" and member.mode & 0o111 != 0o111:
                         raise ValueError("executable permissions missing")
