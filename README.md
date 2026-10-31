@@ -5,6 +5,7 @@
 > **Heartspread98 layout test branch:** [status, build and device test guide](docs/ios9-layout-test.md).
 > This branch contains an experimental fix. A Windows-built armv7 test package
 > passed structural checks; device installation and playback remain unverified.
+> Experimental Cydia source: https://heartspread98.github.io/Opaline/
 > The installation instructions below
 > describe Joeviocoe's original release, not this test build.
 
