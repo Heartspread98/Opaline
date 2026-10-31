@@ -15,6 +15,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BIN="$APP/$(basename "$APP" .app)"
 V=/Volumes/SystemRoot
 LIPO="$V$HOME/legacy-ios9/toolchain/xc12/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
+HOST_OS="$(uname -s)"
 
 mkdir -p "$APP/Frameworks"
 python3 - "$RUNTIME" "$APP/Frameworks" "$BIN" <<'PY'
@@ -98,7 +99,14 @@ PY
 [ $? -eq 0 ] || exit 1
 
 for f in "$APP"/Frameworks/*.dylib; do
-    darling shell "$LIPO" -thin armv7 "$V$(readlink -f "$f")" -output "$V$(readlink -f "$f").thin" >/dev/null 2>&1
+    [ -f "$f" ] || continue
+    if [ "$HOST_OS" = "Darwin" ]; then
+        # Already-thin armv7 libraries need no conversion. The package validator
+        # rejects any fat or non-armv7 result if thinning failed.
+        xcrun lipo -thin armv7 "$f" -output "$f.thin" >/dev/null 2>&1
+    else
+        darling shell "$LIPO" -thin armv7 "$V$(readlink -f "$f")" -output "$V$(readlink -f "$f").thin" >/dev/null 2>&1
+    fi
     [ -s "$f.thin" ] && mv "$f.thin" "$f"
 done
 
@@ -108,12 +116,12 @@ done
 # The main binary additionally carries Keychain entitlements: without them
 # securityd rejects every Keychain call with -34018 and sign-in cannot persist.
 # Only the executable needs them; the dylibs are signed bare.
-ENTITLEMENTS="$REPO/scripts/legacy/Opaline.entitlements"
+ENTITLEMENTS="${ENTITLEMENTS:-$REPO/scripts/legacy/Opaline.entitlements}"
 if [ -f "$ENTITLEMENTS" ]; then
-    ldid -S"$ENTITLEMENTS" "$BIN"
+    ldid -S"$ENTITLEMENTS" "$BIN" || exit 1
 else
     echo "  WARNING: no entitlements file; Keychain will fail with -34018" >&2
-    ldid -S "$BIN"
+    ldid -S "$BIN" || exit 1
 fi
-for f in "$APP"/Frameworks/*.dylib; do ldid -S "$f"; done
+for f in "$APP"/Frameworks/*.dylib; do [ ! -f "$f" ] || ldid -S "$f" || exit 1; done
 echo "  signed $(( $(ls "$APP"/Frameworks/*.dylib 2>/dev/null | wc -l) + 1 )) Mach-O file(s)"

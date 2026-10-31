@@ -20,9 +20,7 @@ enum DownloadStore {
     static let partSuffix = ".part.mp4"
 
     static let root: URL = {
-        let base = FileManager.default.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        )[0]
+        let base = AppStorage.directory(.applicationSupportDirectory)
         var url = base.appendingPathComponent(folderName, isDirectory: true)
         try? FileManager.default.createDirectory(
             at: url, withIntermediateDirectories: true

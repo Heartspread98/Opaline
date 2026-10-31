@@ -18,7 +18,7 @@ BIN="$TC/Toolchains/XcodeDefault.xctoolchain/usr/bin"
 args=()
 for a in "$@"; do
     case "$a" in
-        /home/*|/tmp/*|/var/tmp/*) args+=("$V$a") ;;
+        /home/*|/root/*|/mnt/*|/tmp/*|/var/tmp/*) args+=("$V$a") ;;
         *)                         args+=("$a")   ;;
     esac
 done

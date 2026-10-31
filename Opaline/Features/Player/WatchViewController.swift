@@ -159,6 +159,9 @@ final class WatchViewController: UIViewController {
     // MARK: - Constraints
 
     var playerAspectConstraint: NSLayoutConstraint?
+    #if LEGACY_IOS9 && LAYOUT_TEST_APP
+    var lastLayoutDiagnostic = ""
+    #endif
     var relatedSlot = SlotLayout(), queueBarSlot = SlotLayout()
     /// Portrait panel's draggable top edge, in `view` coordinates. `.landscape`/
     /// `.isLandscape` on the slot double as the sidebar bookkeeping when it isn't.
@@ -273,6 +276,16 @@ final class WatchViewController: UIViewController {
         super.viewDidLayoutSubviews()
         updateLayoutForSize()
         adjustForFloatingNavBar()
+        #if LEGACY_IOS9 && LAYOUT_TEST_APP
+        let diagnostic = "view=\(view.bounds) container=\(playerContainer.frame) "
+            + "player=\(String(describing: videoPlayerView?.bounds)) "
+            + "layer=\(String(describing: videoPlayerView?.playerLayer.bounds)) "
+            + "scroll=\(scrollView.bounds) content=\(scrollView.contentSize)"
+        if diagnostic != lastLayoutDiagnostic {
+            lastLayoutDiagnostic = diagnostic
+            AppLog.always("LayoutTest", diagnostic)
+        }
+        #endif
     }
 
     override func viewWillDisappear(

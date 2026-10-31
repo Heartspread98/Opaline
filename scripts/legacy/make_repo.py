@@ -25,6 +25,7 @@ import hashlib
 import io
 import sys
 import tarfile
+from email.utils import formatdate
 from pathlib import Path
 
 ORIGIN = "Opaline Legacy (iOS 9 / armv7)"
@@ -97,7 +98,7 @@ def main():
 
     packages = ("\n\n".join(stanzas) + "\n").encode("utf-8")
     (root / "Packages").write_bytes(packages)
-    (root / "Packages.gz").write_bytes(gzip.compress(packages))
+    (root / "Packages.gz").write_bytes(gzip.compress(packages, mtime=0))
     (root / "Packages.bz2").write_bytes(bz2.compress(packages))
 
     (root / "Release").write_text(
@@ -108,7 +109,18 @@ def main():
         "Codename: ios9\n"
         "Architectures: iphoneos-arm\n"
         "Components: main\n"
-        "Description: Opaline built for 32-bit A5/A5X devices on iOS 9.3.5\n",
+        "Description: Opaline built for 32-bit A5/A5X devices on iOS 9.3.5\n"
+        f"Date: {formatdate(usegmt=True)}\n"
+        + "".join(
+            heading + ":\n" + "".join(
+                f" {algorithm((root / name).read_bytes()).hexdigest()} "
+                f"{(root / name).stat().st_size:16d} {name}\n"
+                for name in ("Packages", "Packages.gz", "Packages.bz2")
+            )
+            for heading, algorithm in (("MD5Sum", hashlib.md5),
+                                       ("SHA1", hashlib.sha1),
+                                       ("SHA256", hashlib.sha256))
+        ),
         encoding="utf-8")
 
     rows = "\n".join(

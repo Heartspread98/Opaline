@@ -193,6 +193,9 @@ phase "compile (${#SOURCES[@]} files, mode=$MODE)"
 # Swift 5.4 and the driver rejects it; interop is on by default for Darwin.
 COMMON=(-target "$TARGET" -sdk "$SDK" -module-name "$MODULE" "$OPT"
         -swift-version 5 -D LEGACY_IOS9)
+if [ "${LAYOUT_TEST:-0}" = "1" ]; then
+    COMMON+=(-D LAYOUT_TEST_APP)
+fi
 
 if [ "$MODE" = "wmo" ]; then
     log "whole-module: one frontend process over all ${#SOURCES[@]} files"

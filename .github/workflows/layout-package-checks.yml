@@ -1,0 +1,23 @@
+name: Layout test distribution checks (no iOS compilation)
+on:
+  push:
+    branches: [fix/ios9-player-layout]
+  pull_request:
+    paths:
+      - 'scripts/legacy/**'
+      - 'Opaline/Features/Player/**'
+      - '.github/workflows/layout-package-checks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  distribution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: python scripts/legacy/test_layout_distribution.py -v
+      - run: bash -n scripts/legacy/build_layout_test.sh
+      - run: git diff --check

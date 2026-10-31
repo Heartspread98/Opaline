@@ -26,7 +26,7 @@ import subprocess
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-BUNDLE_ID = "com.verback.YTLite"
+BUNDLE_ID = os.environ.get("BUNDLE_ID", "com.verback.YTLite")
 # Portrait first; iOS matches on pixel size, and these are the pre-iOS-8 names
 # that need no storyboard and no ibtool.
 LAUNCH_IMAGES = {
@@ -53,7 +53,8 @@ def marketing_version():
 
 
 def build_plist(app, version):
-    partial = plistlib.load((REPO / "Opaline/Info.plist").open("rb"))
+    with (REPO / "Opaline/Info.plist").open("rb") as handle:
+        partial = plistlib.load(handle)
     # $(VAR) substitutions Xcode would have made; none of them are needed here,
     # and a literal "$(APP_MANIFEST_URL)" in the bundle is worse than absence.
     partial = {k: v for k, v in partial.items() if not (isinstance(v, str) and v.startswith("$("))}
@@ -102,6 +103,14 @@ def build_plist(app, version):
         "UIPrerenderedIcon": False,
     }
     plist.update(partial)
+    # Test builds must have their own sandbox, URL handler and home-screen name.
+    # Apply after merging the partial plist so it cannot restore the old ID.
+    plist["CFBundleIdentifier"] = BUNDLE_ID
+    plist["CFBundleDisplayName"] = os.environ.get("BUNDLE_DISPLAY_NAME", "Opaline")
+    if BUNDLE_ID != "com.verback.YTLite":
+        plist["CFBundleURLTypes"] = [{
+            "CFBundleURLSchemes": [os.environ.get("BUNDLE_URL_SCHEME", "opaline-layout-test")]
+        }]
 
     # App Transport Security, for the loopback playback server.
     #
