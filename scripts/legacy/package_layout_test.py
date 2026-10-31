@@ -96,10 +96,22 @@ def validate_app(app):
     return info
 
 
-def tar_gz(entries):
+def tar_gz(entries, directory_entries=False):
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+        added_directories = set()
         for name, data, mode in entries:
+            if directory_entries:
+                parts = name.split("/")
+                for depth in range(1, len(parts)):
+                    directory = "/".join(parts[:depth]) + "/"
+                    if directory in added_directories:
+                        continue
+                    item = tarfile.TarInfo(directory)
+                    item.type = tarfile.DIRTYPE
+                    item.mode, item.uid, item.gid, item.mtime = 0o755, 0, 0, 0
+                    archive.addfile(item)
+                    added_directories.add(directory)
             item = tarfile.TarInfo(name)
             item.size, item.mode, item.uid, item.gid, item.mtime = len(data), mode, 0, 0, 0
             archive.addfile(item, io.BytesIO(data))
@@ -147,7 +159,7 @@ def package(app, version, output):
               ("control.tar.gz", tar_gz([("control", control, 0o644),
                                         ("postinst", refresh, 0o755),
                                         ("postrm", refresh, 0o755)])),
-              ("data.tar.gz", tar_gz(files))])
+              ("data.tar.gz", tar_gz(files, directory_entries=True))])
     output.mkdir(parents=True, exist_ok=True)
     destination = output / f"{PACKAGE}_{version}_iphoneos-arm.deb"
     destination.write_bytes(raw)
