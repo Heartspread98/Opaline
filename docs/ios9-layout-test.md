@@ -83,12 +83,18 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Check | Status |
 |---|---|
 | Source and screenshot inspection | complete |
-| Python distribution integration tests | 8 passed locally |
+| Python distribution integration tests | 9 passed locally and in CI, including missing-directory regression |
 | Python syntax, shell syntax, whitespace | passed locally |
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
-| Modified real armv7 .deb | built and structurally verified: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261031232052_iphoneos-arm.deb` (20,016,416 bytes; SHA256 `cb734a25b1af51fc688d4a8ae4f849c7889bfeafd4655125dbff30f92e24851a`) |
-| iPod / iPad install and playback | not tested |
-| Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; all five repository endpoints returned HTTP 200, downloaded indexes and `.deb` matched expected hashes; device Cydia refresh not tested |
+| Modified real armv7 .deb | directory-safe build: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261031234549_iphoneos-arm.deb` (20,022,310 bytes; SHA256 `e9b8269e57bac4aef78fd3fd99e7bbaf8fda3b99a9d433fa03e8822a3fdbeb2b`) |
+| iPod / iPad install and playback | first iPod install failed unpacking `Base.lproj/LaunchScreen.storyboard`; missing directory records were fixed in the new package, which has not been retried on device; no playback result |
+| Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; new package endpoint returned HTTP 200 and downloaded SHA256 matched; device Cydia refresh of new version pending |
+
+The first package omitted tar directory records. The iPod's Cydia/dpkg failed
+at its first nested file with `unable to create ...Base.lproj/LaunchScreen.storyboard.dpkg-new`.
+The package builder now emits `Applications/`, the app directory and each
+subdirectory before files. The validator rejects packages without those records.
+This is a packaging correction, not evidence of successful device installation.
 
 The build used Apple Swift 5.4.2 and the iPhoneOS 14.5 SDK extracted from
 Xcode 12.5.1 into the Windows WSL build environment. A separate minimal UIKit
