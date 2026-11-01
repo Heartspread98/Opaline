@@ -67,6 +67,12 @@ extension WatchViewController {
         nc.addObserver(self, selector: #selector(appWillEnterForeground), name: fg, object: nil)
         nc.addObserver(
             self,
+            selector: #selector(loopbackUpstreamForbidden(_:)),
+            name: LegacyLoopbackServer.upstreamForbiddenNotification,
+            object: nil
+        )
+        nc.addObserver(
+            self,
             selector: #selector(queueDidChange),
             name: PlaybackQueue.didChangeNotification,
             object: nil
@@ -125,6 +131,11 @@ extension WatchViewController {
     }
 
     func setupScrollAndPlayer() {
+        #if LEGACY_IOS9
+        // The player already starts below topLayoutGuide. A second automatic
+        // navigation-bar inset would shift the scroll content independently.
+        automaticallyAdjustsScrollViewInsets = false
+        #endif
         for item in [scrollView, playerContainer, sidebarContainer, contentView] {
             item.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -173,7 +184,27 @@ extension WatchViewController {
 
     func activateScrollConstraints() {
         let cv = contentView, sv = scrollView
+        #if LEGACY_IOS9
+        // Pre-iOS 11: edge constraints describe the CONTENT, but a width
+        // constraint describes the FRAME. The compatibility layout guides
+        // pin both guides to the same edges and lose that distinction.
+        let contentConstraints = [
+            cv.topAnchor.constraint(equalTo: sv.topAnchor),
+            cv.leadingAnchor.constraint(equalTo: sv.leadingAnchor),
+            cv.trailingAnchor.constraint(equalTo: sv.trailingAnchor),
+            cv.bottomAnchor.constraint(equalTo: sv.bottomAnchor),
+            cv.widthAnchor.constraint(equalTo: sv.widthAnchor)
+        ]
+        #else
         let cl = sv.contentLayoutGuide, fl = sv.frameLayoutGuide
+        let contentConstraints = [
+            cv.topAnchor.constraint(equalTo: cl.topAnchor),
+            cv.leadingAnchor.constraint(equalTo: cl.leadingAnchor),
+            cv.trailingAnchor.constraint(equalTo: cl.trailingAnchor),
+            cv.bottomAnchor.constraint(equalTo: cl.bottomAnchor),
+            cv.widthAnchor.constraint(equalTo: fl.widthAnchor)
+        ]
+        #endif
         NSLayoutConstraint.activate(
             [
                 playerTopConstraint, playerLeadingConstraint,
@@ -182,14 +213,10 @@ extension WatchViewController {
                 // Use safe area for leading to match playerLeadingConstraint so the
                 // scroll content aligns with the player edge on iPhone landscape.
                 sv.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-                sv.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-                cv.topAnchor.constraint(equalTo: cl.topAnchor),
-                cv.leadingAnchor.constraint(equalTo: cl.leadingAnchor),
-                cv.trailingAnchor.constraint(equalTo: cl.trailingAnchor),
-                cv.bottomAnchor.constraint(equalTo: cl.bottomAnchor),
-                cv.widthAnchor.constraint(equalTo: fl.widthAnchor)
+                sv.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             ].compactMap { $0 }
         )
+        NSLayoutConstraint.activate(contentConstraints)
     }
 
     func setupPlayerOverlays() {

@@ -43,10 +43,7 @@ final class ImageDiskCache {
     }
 
     init() {
-        let caches = fm.urls(
-            for: .cachesDirectory,
-            in: .userDomainMask
-        ).first ?? URL(fileURLWithPath: NSTemporaryDirectory())
+        let caches = AppStorage.directory(.cachesDirectory)
         cacheDir = caches.appendingPathComponent(
             "ImageDiskCache",
             isDirectory: true

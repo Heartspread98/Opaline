@@ -1,6 +1,19 @@
 import Foundation
 import UIKit
 
+/// System apps under /Applications share the mobile user's filesystem.
+/// A distinct bundle ID alone does not isolate downloads or library JSON.
+enum AppStorage {
+    static func directory(_ kind: FileManager.SearchPathDirectory) -> URL {
+        let base = FileManager.default.urls(for: kind, in: .userDomainMask)[0]
+        #if LEGACY_IOS9 && LAYOUT_TEST_APP
+        return base.appendingPathComponent("OpalineLayoutTest", isDirectory: true)
+        #else
+        return base
+        #endif
+    }
+}
+
 /// Lightweight timestamped logger.
 /// Writes to both console and a rotating log file in Caches/Logs/.
 enum AppLog {
@@ -19,9 +32,7 @@ enum AppLog {
     private static var currentFileSize: UInt64 = 0
 
     private static let logDirectory: URL = {
-        let caches = FileManager.default.urls(
-            for: .cachesDirectory, in: .userDomainMask
-        )[0]
+        let caches = AppStorage.directory(.cachesDirectory)
         let dir = caches.appendingPathComponent("Logs")
         try? FileManager.default.createDirectory(
             at: dir, withIntermediateDirectories: true

@@ -4,6 +4,7 @@ import UIKit
 struct FullscreenSnapshot {
     let superview: UIView
     let frame: CGRect
+    let host: UIView
 }
 
 // MARK: - Fullscreen
@@ -13,12 +14,13 @@ extension WatchViewController {
         guard let window = view.window else {
             return
         }
-        detachPlayerToWindow(playerView, window: window)
+        let host = fullscreenHost(in: window)
+        detachPlayerToHost(playerView, host: host)
         updateQueueBar()
         setNeedsStatusBarAppearanceUpdate()
         setNeedsUpdateOfHomeIndicatorAutoHidden()
         guard animated else {
-            playerView.frame = window.bounds
+            playerView.frame = host.bounds
             playerView.applyAutoZoomIfNeeded()
             return
         }
@@ -27,7 +29,7 @@ extension WatchViewController {
             delay: 0,
             options: .curveEaseInOut,
             animations: {
-                playerView.frame = window.bounds
+                playerView.frame = host.bounds
             },
             completion: { _ in
                 playerView.applyAutoZoomIfNeeded()
@@ -35,30 +37,41 @@ extension WatchViewController {
         )
     }
 
-    private func detachPlayerToWindow(
+    private func fullscreenHost(in window: UIWindow) -> UIView {
+        #if LEGACY_IOS9
+        // A direct UIWindow child is drawn on iOS 9 but can miss button taps,
+        // particularly on iPad. The root controller's view has UIKit's normal
+        // hit-testing and still fills the window when the status bar is hidden.
+        return window.rootViewController?.view ?? window
+        #else
+        return window
+        #endif
+    }
+
+    private func detachPlayerToHost(
         _ playerView: VideoPlayerView,
-        window: UIWindow
+        host: UIView
     ) {
-        let frameInWindow = playerView.convert(
-            playerView.bounds, to: window
+        let frameInHost = playerView.convert(
+            playerView.bounds, to: host
         )
         fullscreenSnapshot = FullscreenSnapshot(
             superview: playerView.superview ?? view,
-            frame: playerView.frame
+            frame: playerView.frame,
+            host: host
         )
         playerView.removeFromSuperview()
         playerView.translatesAutoresizingMaskIntoConstraints = true
         // Allow the player to resize with the window when the device rotates while
         // in fullscreen, so the video fills the screen in the new orientation.
         playerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        playerView.frame = frameInWindow
-        window.addSubview(playerView)
+        playerView.frame = frameInHost
+        host.addSubview(playerView)
         playerView.isFullscreen = true
     }
 
     func exitFullscreen(playerView: VideoPlayerView, animated: Bool = true) {
-        guard let window = view.window,
-              let snap = fullscreenSnapshot else {
+        guard let snap = fullscreenSnapshot else {
             return
         }
         // Ask for the status bar now, so it slides back in alongside the
@@ -66,7 +79,7 @@ extension WatchViewController {
         // arrives half a second late and shoves the settled layout down.
         isLeavingFullscreen = true
         setNeedsStatusBarAppearanceUpdate()
-        let target = snap.superview.convert(snap.frame, to: window)
+        let target = snap.superview.convert(snap.frame, to: snap.host)
         guard animated else {
             restoreFromFullscreen(playerView: playerView, snapshot: snap)
             return

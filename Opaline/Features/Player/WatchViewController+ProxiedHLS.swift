@@ -46,6 +46,10 @@ extension WatchViewController {
         // After `attachPlayer` — it is what creates the player view on a
         // first load, so an earlier call would land on nothing.
         attachPlayer(item: prepared.item)
+        activeLoopbackIDs = Set(prepared.loopbackIDs)
+        // Once the replacement item is attached, a new 403 must be allowed to
+        // spend the next bounded recovery step even if it has not become ready.
+        isRecoveringPlayback = false
         videoPlayerView?.setAudioOnly(
             active: AudioOnlyMode.isEnabled,
             available: playbackFacade.activeVideoSource?.availableQualities

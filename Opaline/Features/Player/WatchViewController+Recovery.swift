@@ -4,6 +4,19 @@ import UIKit
 // MARK: - Stream URL Expiration Recovery
 
 extension WatchViewController {
+    @objc
+    func loopbackUpstreamForbidden(_ note: Notification) {
+        guard let id = note.object as? String,
+              activeLoopbackIDs.contains(id),
+              !isRecoveringPlayback,
+              videoPlayerView?.player != nil else {
+            return
+        }
+        AppLog.always("Player", "active loopback stream received HTTP 403; recovering")
+        activeLoopbackIDs.removeAll()
+        recoverPlayback()
+    }
+
     func recoverPlayback() {
         guard !isRecoveringPlayback,
               videoPlayerView?.player != nil

@@ -54,7 +54,7 @@ final class AppCache {
     var channelInfoMemory: [String: ChannelInfo] = [:]
 
     private var cacheDir: URL {
-        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        AppStorage.directory(.cachesDirectory)
             .appendingPathComponent("FeedCache", isDirectory: true)
     }
 

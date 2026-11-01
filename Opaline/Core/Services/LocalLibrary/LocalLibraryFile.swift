@@ -36,9 +36,8 @@ enum LocalLibraryFile {
     private static let directoryName = "LocalLibrary"
 
     static func url(for fileName: String) -> URL {
-        let base = FileManager.default.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        )[0].appendingPathComponent(directoryName, isDirectory: true)
+        let base = AppStorage.directory(.applicationSupportDirectory)
+            .appendingPathComponent(directoryName, isDirectory: true)
         try? FileManager.default.createDirectory(
             at: base, withIntermediateDirectories: true
         )

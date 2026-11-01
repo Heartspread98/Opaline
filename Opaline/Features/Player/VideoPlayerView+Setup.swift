@@ -556,6 +556,8 @@ extension VideoPlayerView {
         super.layoutSubviews()
         // bounds+position instead of frame: frame is undefined while the
         // layer carries the pinch-zoom scale transform.
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         playerLayer.bounds = bounds
         playerLayer.position = CGPoint(
             x: bounds.midX,
@@ -573,5 +575,6 @@ extension VideoPlayerView {
             width: bounds.width,
             height: 110
         )
+        CATransaction.commit()
     }
 }

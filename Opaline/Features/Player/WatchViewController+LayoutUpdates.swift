@@ -264,6 +264,38 @@ extension WatchViewController {
             to: size,
             with: coordinator
         )
+        #if LEGACY_IOS9
+        if UIDevice.current.userInterfaceIdiom != .pad {
+            let isLandscape = size.width > size.height
+            AppLog.always(
+                "Rotation",
+                "iOS 9 phone begin landscape=\(isLandscape)"
+                    + " rate=\(videoPlayerView?.player?.rate ?? 0)"
+            )
+            // Moving an AVPlayerLayer between parents and forcing a full page
+            // layout inside UIKit's rotation animation can stall the old phone.
+            // Keep the player attached while UIKit rotates, then move it once
+            // the root view has its final bounds.
+            coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+                guard let self = self else {
+                    return
+                }
+                AppLog.always("Rotation", "iOS 9 phone settled; moving player")
+                self.syncFullscreenWithRotation(isLandscape: isLandscape)
+                if let snapshot = self.fullscreenSnapshot {
+                    self.videoPlayerView?.frame = snapshot.host.bounds
+                    self.videoPlayerView?.setNeedsLayout()
+                } else {
+                    self.updateLayoutForSize()
+                }
+                AppLog.always(
+                    "Rotation",
+                    "iOS 9 phone end rate=\(self.videoPlayerView?.player?.rate ?? 0)"
+                )
+            }
+            return
+        }
+        #endif
         coordinator.animate(
             alongsideTransition: { [weak self] _ in
                 guard let self = self else {
@@ -272,11 +304,10 @@ extension WatchViewController {
                 // On iPhone landscape *is* fullscreen: the rotation itself
                 // drives entering and leaving it.
                 self.syncFullscreenWithRotation(isLandscape: size.width > size.height)
-                // While in fullscreen the player view lives directly in the
-                // window; keep its frame in sync with the rotating window.
-                if self.fullscreenSnapshot != nil,
-                   let window = self.view.window {
-                    self.videoPlayerView?.frame = window.bounds
+                // The fullscreen host rotates with UIKit; keep the player
+                // fitted to that host after its bounds change.
+                if let snapshot = self.fullscreenSnapshot {
+                    self.videoPlayerView?.frame = snapshot.host.bounds
                     self.videoPlayerView?.setNeedsLayout()
                 } else {
                     self.updateLayoutForSize(size)

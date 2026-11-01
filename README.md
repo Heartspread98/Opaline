@@ -2,6 +2,13 @@
 
 # Opaline Legacy (iOS 9 / armv7)
 
+> **Heartspread98 layout test branch:** [status, build and device test guide](docs/ios9-layout-test.md).
+> This branch contains an experimental fix. A Windows-built armv7 test package
+> passed structural checks; device installation and playback remain unverified.
+> Experimental Cydia source: https://heartspread98.github.io/Opaline/
+> The installation instructions below
+> describe Joeviocoe's original release, not this test build.
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="source/logo-dark.png">
   <img src="source/logo.png" width="128" alt="">

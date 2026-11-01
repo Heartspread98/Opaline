@@ -21,6 +21,9 @@ import Foundation
 /// loopback interface and serves only paths registered with it, so nothing
 /// outside the app can reach it.
 final class LegacyLoopbackServer {
+    static let upstreamForbiddenNotification = Notification.Name(
+        "opaline.legacyLoopback.upstreamForbidden"
+    )
     /// One stream this server will serve, under `/<id>`.
     struct Stream {
         let url: URL
@@ -85,11 +88,15 @@ final class LegacyLoopbackServer {
     /// So start small, and grow only while reads stay sequential — indexing gets
     /// cheap misses, playback still gets big efficient refills.
     private static let minWindow: Int64 = 256 * 1024
-    /// 8 MB once a read is clearly sequential. Sustained playback needs only
-    /// ~46 KB/s (84 MB over 30 minutes), so reading further ahead costs almost
-    /// nothing and buys a large cushion against the per-request round trip that
-    /// showed up as jitter.
+    #if LEGACY_IOS9
+    // Device log: the first 256/512 KB windows were served, while the next
+    // 1 MB video range and a multi-MB audio range returned 403. Bound each
+    // upstream request like maxChunk, even when the reader is sequential.
+    private static let maxWindow: Int64 = 900_000
+    #else
+    /// 8 MB once a read is clearly sequential on modern systems.
     private static let maxWindow: Int64 = 8 * 1024 * 1024
+    #endif
 
     private var windows: [String: Window] = [:]
     /// Fragment headers fetched ahead of time, keyed by their start offset.
@@ -503,14 +510,11 @@ final class LegacyLoopbackServer {
     /// Called with the head of every segment from the `sidx`. ~234 ranges of a
     /// few KB each: serially that is 234 round-trips and no better than letting
     /// AVFoundation do the walking, so they go out concurrently and the whole
-    /// index lands in a couple of seconds instead of forty.
-    /// Concurrency is deliberately low. These are small requests, so the win
-    /// comes from overlapping latency rather than from saturating the link, and
-    /// a wide burst of ranged requests is exactly the shape that gets a visitor
-    /// identity throttled. googlevideo has already cut us off once in testing
-    /// (`upstream HTTP 0` across every connection at once), so four at a time,
-    /// which still turns ~40 s of serial round-trips into a couple of seconds.
-    func prime(_ id: String, ranges: [(Int64, Int64)], concurrency: Int = 6) {
+    /// index lands faster than a fully serial walk. The iPod log showed 403s
+    /// after a burst of tiny requests, so use only two simultaneous fetches
+    /// and stop priming at the first failure. A partial cache is still usable
+    /// by the raw stream; a partial remux is rejected by its own validator.
+    func prime(_ id: String, ranges: [(Int64, Int64)], concurrency: Int = 2) {
         lock.lock()
         let stream = streams[id]
         lock.unlock()
@@ -521,23 +525,39 @@ final class LegacyLoopbackServer {
         let gate = DispatchSemaphore(value: concurrency)
         let group = DispatchGroup()
         var total = 0
+        var completed = 0
         let totalLock = NSLock()
+        var failed = false
+        let failureLock = NSLock()
 
         for (start, end) in ranges {
-            group.enter()
             gate.wait()
+            failureLock.lock()
+            let shouldStop = failed
+            failureLock.unlock()
+            if shouldStop {
+                gate.signal()
+                break
+            }
+            group.enter()
             queue.async { [weak self] in
                 defer {
                     gate.signal()
                     group.leave()
                 }
                 guard let self = self else { return }
-                guard let data = self.fetch(stream, from: start, to: end) else { return }
+                guard let data = self.fetch(stream, id: id, from: start, to: end) else {
+                    failureLock.lock()
+                    failed = true
+                    failureLock.unlock()
+                    return
+                }
                 self.lock.lock()
                 self.primed[id]?[start] = data
                 self.lock.unlock()
                 totalLock.lock()
                 total += data.count
+                completed += 1
                 totalLock.unlock()
             }
         }
@@ -548,9 +568,9 @@ final class LegacyLoopbackServer {
         // per-request rate turns into a long wait on exactly the videos where it
         // is least welcome.
         AppLog.player(
-            "loopback[\(id.suffix(2))]: primed \(ranges.count) fragment headers,"
+            "loopback[\(id.suffix(2))]: primed \(completed)/\(ranges.count) fragment headers,"
                 + " \(total / 1024) KB in \(String(format: "%.1f", seconds))s"
-                + " (\(String(format: "%.0f", Double(ranges.count) / max(seconds, 0.001)))/s)"
+                + " (\(String(format: "%.0f", Double(completed) / max(seconds, 0.001)))/s)"
         )
     }
 
@@ -637,7 +657,7 @@ final class LegacyLoopbackServer {
             guard offset <= fetchEnd else {
                 return Data()
             }
-            guard let fresh = fetch(stream, from: offset, to: fetchEnd) else {
+            guard let fresh = fetch(stream, id: id, from: offset, to: fetchEnd) else {
                 return nil
             }
             lock.lock()
@@ -660,7 +680,7 @@ final class LegacyLoopbackServer {
 
     /// Blocking ranged fetch from googlevideo. Runs on a connection's own
     /// queue, never the main thread.
-    private func fetch(_ stream: Stream, from start: Int64, to end: Int64) -> Data? {
+    private func fetch(_ stream: Stream, id: String, from start: Int64, to end: Int64) -> Data? {
         var request = URLRequest(url: stream.url)
         // URLCache keys on the URL and ignores Range, so a cached reply would be
         // replayed for every range. Measured: every request came back with the
@@ -679,6 +699,14 @@ final class LegacyLoopbackServer {
                 result = data
             } else {
                 AppLog.player("loopback: upstream HTTP \(status) for \(start)-\(end)")
+                if status == 403 {
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(
+                            name: Self.upstreamForbiddenNotification,
+                            object: id
+                        )
+                    }
+                }
             }
             semaphore.signal()
         }
