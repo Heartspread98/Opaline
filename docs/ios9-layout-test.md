@@ -88,7 +88,7 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
 | Modified real armv7 .deb | rotation + HTTP 403 recovery candidate: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261101152709_iphoneos-arm.deb` (20,026,726 bytes; SHA256 `54b38d79c3335223452fd172fe671f1e8a7fedde7cfd5194bb4307b13c88d615`) |
 | iPod / iPad install and playback | The user installed the preceding fullscreen-host test build on an iPod. Portrait works, but landscape stops both picture and sound and the app will not rotate back. Its private log showed repeated upstream HTTP 403s during fragment priming (10/77 video and 7/40 audio headers fetched), then 403s for both streams during playback after rotation; no player recovery followed. The iPad plays well except that its fullscreen exit button was unresponsive on the earlier build; the fullscreen-host candidate has not been reported on iPad yet. The new recovery candidate is compiled but not yet device-tested. |
-| Live Pages source and Cydia refresh | The rotation-only candidate was published and its indexes/downloaded package matched SHA256. The HTTP 403 recovery candidate is pending publication and device refresh. |
+| Live Pages source and Cydia refresh | The HTTP 403 recovery candidate was published to `https://heartspread98.github.io/Opaline/`; its downloaded package matched SHA256 and the complete downloaded index/package tree passed the repository verifier. Device refresh and playback retest are pending. |
 
 The first package omitted tar directory records. The iPod's Cydia/dpkg failed
 at its first nested file with `unable to create ...Base.lproj/LaunchScreen.storyboard.dpkg-new`.
