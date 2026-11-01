@@ -264,6 +264,38 @@ extension WatchViewController {
             to: size,
             with: coordinator
         )
+        #if LEGACY_IOS9
+        if UIDevice.current.userInterfaceIdiom != .pad {
+            let isLandscape = size.width > size.height
+            AppLog.always(
+                "Rotation",
+                "iOS 9 phone begin landscape=\(isLandscape)"
+                    + " rate=\(videoPlayerView?.player?.rate ?? 0)"
+            )
+            // Moving an AVPlayerLayer between parents and forcing a full page
+            // layout inside UIKit's rotation animation can stall the old phone.
+            // Keep the player attached while UIKit rotates, then move it once
+            // the root view has its final bounds.
+            coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+                guard let self = self else {
+                    return
+                }
+                AppLog.always("Rotation", "iOS 9 phone settled; moving player")
+                self.syncFullscreenWithRotation(isLandscape: isLandscape)
+                if let snapshot = self.fullscreenSnapshot {
+                    self.videoPlayerView?.frame = snapshot.host.bounds
+                    self.videoPlayerView?.setNeedsLayout()
+                } else {
+                    self.updateLayoutForSize()
+                }
+                AppLog.always(
+                    "Rotation",
+                    "iOS 9 phone end rate=\(self.videoPlayerView?.player?.rate ?? 0)"
+                )
+            }
+            return
+        }
+        #endif
         coordinator.animate(
             alongsideTransition: { [weak self] _ in
                 guard let self = self else {

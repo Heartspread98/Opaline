@@ -86,9 +86,9 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Python distribution integration tests | 9 passed locally and in CI, including missing-directory regression |
 | Python syntax, shell syntax, whitespace | passed locally |
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
-| Modified real armv7 .deb | fullscreen-host candidate: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261101135344_iphoneos-arm.deb` (20,022,366 bytes; SHA256 `dbe10fd9de8adeee0ddbbb2d0a0e41538440dc84e7d69811545bd6ca4f539959`) |
-| iPod / iPad install and playback | user reports the iPod trial launches in portrait; after rotation video keeps advancing but audio stops, and UI may stop responding. The iPad plays well except that its fullscreen exit button remains visible but does not work. The fullscreen-host change is built but not yet tested on either device. |
-| Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; the fullscreen-host package and indexes were downloaded and matched their local SHA256 hashes. Device refresh of this new version is pending. |
+| Modified real armv7 .deb | iPod rotation candidate: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261101151139_iphoneos-arm.deb` (20,024,416 bytes; SHA256 `29c6a1facf6e8253aae3c8c573d2531335194482376253693406e95390d11c44`) |
+| iPod / iPad install and playback | The user installed the preceding fullscreen-host test build on an iPod. Portrait works, but landscape stops both picture and sound and the app will not rotate back. The iPad plays well except that its fullscreen exit button was unresponsive on the earlier build; the fullscreen-host candidate has not been reported on iPad yet. The new rotation candidate is compiled but not yet device-tested. |
+| Live Pages source and Cydia refresh | The previous fullscreen-host package was published and its indexes/downloaded package matched SHA256. The iPod rotation candidate is pending publication and device refresh. |
 
 The first package omitted tar directory records. The iPod's Cydia/dpkg failed
 at its first nested file with `unable to create ...Base.lproj/LaunchScreen.storyboard.dpkg-new`.
