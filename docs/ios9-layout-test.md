@@ -86,8 +86,8 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Python distribution integration tests | 9 passed locally and in CI, including missing-directory regression |
 | Python syntax, shell syntax, whitespace | passed locally |
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
-| Modified real armv7 .deb | directory-safe build: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261031234549_iphoneos-arm.deb` (20,022,310 bytes; SHA256 `e9b8269e57bac4aef78fd3fd99e7bbaf8fda3b99a9d433fa03e8822a3fdbeb2b`) |
-| iPod / iPad install and playback | user reports the iPod trial launches in portrait; after rotation video keeps advancing but audio stops, and UI may stop responding. The user also reports the iPad trial works well. Exact installed versions, detailed iPad orientation checks, iPod playback log and the iPod cause are pending. |
+| Modified real armv7 .deb | fullscreen-host candidate: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261101135344_iphoneos-arm.deb` (20,022,366 bytes; SHA256 `dbe10fd9de8adeee0ddbbb2d0a0e41538440dc84e7d69811545bd6ca4f539959`) |
+| iPod / iPad install and playback | user reports the iPod trial launches in portrait; after rotation video keeps advancing but audio stops, and UI may stop responding. The iPad plays well except that its fullscreen exit button remains visible but does not work. The fullscreen-host change is built but not yet tested on either device. |
 | Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; new package endpoint returned HTTP 200 and downloaded SHA256 matched. User reports an iPod trial launched after the packaging correction. |
 
 The first package omitted tar directory records. The iPod's Cydia/dpkg failed
@@ -96,7 +96,11 @@ The package builder now emits `Applications/`, the app directory and each
 subdirectory before files. The validator rejects packages without those records.
 The subsequent iPod trial launches in portrait according to the user. The
 iPad trial was also reported to work well, without a detailed orientation
-matrix. The iPod landscape audio/UI issue remains unresolved.
+matrix. The iPad fullscreen exit button was then reported unresponsive. The
+iOS 9 test build now hosts the fullscreen view inside the root controller's
+view rather than as a direct `UIWindow` child so UIKit hit-testing follows the
+same view hierarchy as normal playback. This is a candidate fix, not a device
+result. The iPod landscape audio/UI issue also remains unresolved.
 
 The build used Apple Swift 5.4.2 and the iPhoneOS 14.5 SDK extracted from
 Xcode 12.5.1 into the Windows WSL build environment. A separate minimal UIKit
