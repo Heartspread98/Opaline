@@ -88,7 +88,7 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
 | Modified real armv7 .deb | fullscreen-host candidate: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261101135344_iphoneos-arm.deb` (20,022,366 bytes; SHA256 `dbe10fd9de8adeee0ddbbb2d0a0e41538440dc84e7d69811545bd6ca4f539959`) |
 | iPod / iPad install and playback | user reports the iPod trial launches in portrait; after rotation video keeps advancing but audio stops, and UI may stop responding. The iPad plays well except that its fullscreen exit button remains visible but does not work. The fullscreen-host change is built but not yet tested on either device. |
-| Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; new package endpoint returned HTTP 200 and downloaded SHA256 matched. User reports an iPod trial launched after the packaging correction. |
+| Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; the fullscreen-host package and indexes were downloaded and matched their local SHA256 hashes. Device refresh of this new version is pending. |
 
 The first package omitted tar directory records. The iPod's Cydia/dpkg failed
 at its first nested file with `unable to create ...Base.lproj/LaunchScreen.storyboard.dpkg-new`.
