@@ -6,16 +6,16 @@ Codename: ios9
 Architectures: iphoneos-arm
 Components: main
 Description: Opaline built for 32-bit A5/A5X devices on iOS 9.3.5
-Date: Sun, 01 Nov 2026 13:56:55 GMT
+Date: Sun, 01 Nov 2026 15:14:58 GMT
 MD5Sum:
- 9bc2884dd4376af73d768474fddad2da              752 Packages
- ecb68b14d06577db2fc140e1713bf6c1              492 Packages.gz
- 306890ef17dfc9eed3a38d8565729ca5              560 Packages.bz2
+ 7fba9074ba64f5ed631f245e684d4d77              752 Packages
+ f10b2b91d060a803afc2bdef38cd3935              490 Packages.gz
+ 282af844e9feb86c423015d0975f2922              562 Packages.bz2
 SHA1:
- 479e1708c7adc3485b8beac9ee1cd64001561a69              752 Packages
- 198e446600b5895b39f22d708e1bb5a67472ecf8              492 Packages.gz
- 84a03798eab05f784eb03ae1e4c5194825ce8fce              560 Packages.bz2
+ 53ac0785b12101ad12448b273a3c3a72db97f56e              752 Packages
+ 56928484fb1b0f749b21596a7b9e59e667a8995e              490 Packages.gz
+ 806e69e70051ac1342b7e29bb9ae97d5863895fb              562 Packages.bz2
 SHA256:
- 04048795bd8298881842d6f753ba2348270fd5c047cef40429c5caa350a7bcea              752 Packages
- 91e2df9701768e81847610dea28f30231141d1a37b2afb7251d1f75ddaf88aac              492 Packages.gz
- 6651156450d7891154b881459d2413ee80dd7582c8bbf72942feec4f805a5906              560 Packages.bz2
+ 602e46095ad5c594773ab4c99d2923aef270987fec69330568d7db8ab3dcfae5              752 Packages
+ 36b0e2511965ab1aceb4d96718fd111235775a7ab6535e5fd2651bd2ccc252a8              490 Packages.gz
+ b5d91f930082114a458f8d6f0f638ed6ca1f024f3e95937682796b119aca7d8c              562 Packages.bz2
