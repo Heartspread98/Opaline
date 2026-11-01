@@ -87,15 +87,16 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Python syntax, shell syntax, whitespace | passed locally |
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
 | Modified real armv7 .deb | directory-safe build: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261031234549_iphoneos-arm.deb` (20,022,310 bytes; SHA256 `e9b8269e57bac4aef78fd3fd99e7bbaf8fda3b99a9d433fa03e8822a3fdbeb2b`) |
-| iPod / iPad install and playback | user reports the iPod trial now launches in portrait; after rotation the video keeps advancing but audio stops, and the UI may stop responding. Exact installed version, playback log and cause are pending. iPad installation and playback remain untested. |
+| iPod / iPad install and playback | user reports the iPod trial launches in portrait; after rotation video keeps advancing but audio stops, and UI may stop responding. The user also reports the iPad trial works well. Exact installed versions, detailed iPad orientation checks, iPod playback log and the iPod cause are pending. |
 | Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; new package endpoint returned HTTP 200 and downloaded SHA256 matched. User reports an iPod trial launched after the packaging correction. |
 
 The first package omitted tar directory records. The iPod's Cydia/dpkg failed
 at its first nested file with `unable to create ...Base.lproj/LaunchScreen.storyboard.dpkg-new`.
 The package builder now emits `Applications/`, the app directory and each
 subdirectory before files. The validator rejects packages without those records.
-The subsequent iPod trial launches in portrait according to the user. It does
-not yet establish correct landscape playback or iPad compatibility in practice.
+The subsequent iPod trial launches in portrait according to the user. The
+iPad trial was also reported to work well, without a detailed orientation
+matrix. The iPod landscape audio/UI issue remains unresolved.
 
 The build used Apple Swift 5.4.2 and the iPhoneOS 14.5 SDK extracted from
 Xcode 12.5.1 into the Windows WSL build environment. A separate minimal UIKit
@@ -153,8 +154,9 @@ It is deployed from a separate `gh-pages` branch. `Packages`, `Packages.gz`,
 The downloaded indexes matched the generated files; the downloaded package
 matched `Packages` SHA256. The published `Release` content matched after
 normalizing Windows line endings. The original force-push script with its
-default upstream remote was not run. Next refresh the source in the device's
-Cydia and perform the above install checks. HTTP 200 on Windows does not prove iOS 9 TLS compatibility;
+default upstream remote was not run. Both iPod and iPad trials have now been
+reported by the user, but exact package versions and full acceptance checks
+remain to be recorded. HTTP 200 on Windows alone does not prove iOS 9 TLS compatibility;
 do not bypass certificate validation. This generates unsigned APT metadata;
 Release.gpg/InRelease require a separately managed signing key if desired.
 
@@ -162,5 +164,6 @@ GitHub Free supports public Pages repositories; this fork is public. Pages
 limits are 1 GB published size and a soft 100 GB/month bandwidth limit:
 [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
 Preserve the GPLv3 license and corresponding modified source when distributing
-Opaline binaries. The live test source and local package checks do not establish
-that the app installs, launches, or plays video on either device.
+Opaline binaries. The live test source and local package checks alone do not
+establish device playback; the user reports an iPad trial working well and an
+iPod landscape audio/UI failure that still needs diagnosis.
