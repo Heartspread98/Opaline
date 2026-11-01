@@ -1,6 +1,6 @@
 Package: com.heartspread98.opaline.layouttest
 Name: Opaline Layout Test (iOS 9)
-Version: 0.1.0~layout.20261031234549
+Version: 0.1.0~layout.20261101135344
 Architecture: iphoneos-arm
 Section: Multimedia
 Priority: optional
@@ -11,8 +11,8 @@ Author: Opaline contributors
 Homepage: https://github.com/Heartspread98/Opaline
 Description: Experimental iOS 9 player layout fix
  Separate app and data paths; device playback verification required.
-Filename: ./debs/com.heartspread98.opaline.layouttest_0.1.0~layout.20261031234549_iphoneos-arm.deb
-Size: 20022310
-MD5sum: 0c481666bcb34baada55c4c773cd2089
-SHA1: 1e17de8503bc74369a2a0575d57f0ab0c716c32d
-SHA256: e9b8269e57bac4aef78fd3fd99e7bbaf8fda3b99a9d433fa03e8822a3fdbeb2b
+Filename: ./debs/com.heartspread98.opaline.layouttest_0.1.0~layout.20261101135344_iphoneos-arm.deb
+Size: 20022366
+MD5sum: 0a6d555176175465114ba936196200a8
+SHA1: 587984d3ab16937cc0ad2f29e769fac171d94a8e
+SHA256: dbe10fd9de8adeee0ddbbb2d0a0e41538440dc84e7d69811545bd6ca4f539959
