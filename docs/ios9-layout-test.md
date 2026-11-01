@@ -87,7 +87,7 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Python syntax, shell syntax, whitespace | passed locally |
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
 | Modified real armv7 .deb | directory-safe build: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261031234549_iphoneos-arm.deb` (20,022,310 bytes; SHA256 `e9b8269e57bac4aef78fd3fd99e7bbaf8fda3b99a9d433fa03e8822a3fdbeb2b`) |
-| iPod / iPad install and playback | user reports the iPod trial now launches in portrait; rotating to landscape sometimes freezes or loses audio. Exact installed version, playback log and cause are pending. iPad installation and playback remain untested. |
+| iPod / iPad install and playback | user reports the iPod trial now launches in portrait; after rotation the video keeps advancing but audio stops, and the UI may stop responding. Exact installed version, playback log and cause are pending. iPad installation and playback remain untested. |
 | Live Pages source and Cydia refresh | Pages published at `https://heartspread98.github.io/Opaline/`; new package endpoint returned HTTP 200 and downloaded SHA256 matched. User reports an iPod trial launched after the packaging correction. |
 
 The first package omitted tar directory records. The iPod's Cydia/dpkg failed
