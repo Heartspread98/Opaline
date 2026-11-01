@@ -217,7 +217,8 @@ final class CompositionDelivery: StreamDelivery {
                     item: item,
                     resourceLoader: nil,
                     captions: info.captionTracks,
-                    duration: info.duration
+                    duration: info.duration,
+                    loopbackIDs: [videoID, audioID]
                 ))
             } else {
                 LegacyLoopbackServer.shared.withdraw(videoID)

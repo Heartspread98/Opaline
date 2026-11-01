@@ -192,6 +192,7 @@ extension WatchViewController {
     }
 
     func resetPlaybackSurfaces() {
+        activeLoopbackIDs.removeAll()
         videoPlayerView?.player?.pause()
         if let existing =
             videoPlayerView?.player?.currentItem {

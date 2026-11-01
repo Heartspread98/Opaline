@@ -50,19 +50,23 @@ struct PreparedPlayback {
     /// point it was given, and with SABR each swap between the two restarts
     /// the stream.
     let startsAt: Double?
+    /// Loopback streams owned by this item. Ignore 403s from a previous item.
+    let loopbackIDs: [String]
 
     init(
         item: AVPlayerItem,
         resourceLoader: AVAssetResourceLoaderDelegate? = nil,
         captions: [SubtitleTrack] = [],
         duration: Double? = nil,
-        startsAt: Double? = nil
+        startsAt: Double? = nil,
+        loopbackIDs: [String] = []
     ) {
         self.item = item
         self.resourceLoader = resourceLoader
         self.captions = captions
         self.duration = duration
         self.startsAt = startsAt
+        self.loopbackIDs = loopbackIDs
     }
 }
 

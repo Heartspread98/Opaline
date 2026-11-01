@@ -86,9 +86,9 @@ not a compilation. `build.sh --dry-run` also is not a compilation.
 | Python distribution integration tests | 9 passed locally and in CI, including missing-directory regression |
 | Python syntax, shell syntax, whitespace | passed locally |
 | Swift typecheck / armv7 compile / link | passed with Xcode 12.5.1 under Darling; 475 Swift files compiled and linked |
-| Modified real armv7 .deb | iPod rotation candidate: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261101151139_iphoneos-arm.deb` (20,024,416 bytes; SHA256 `29c6a1facf6e8253aae3c8c573d2531335194482376253693406e95390d11c44`) |
-| iPod / iPad install and playback | The user installed the preceding fullscreen-host test build on an iPod. Portrait works, but landscape stops both picture and sound and the app will not rotate back. The iPad plays well except that its fullscreen exit button was unresponsive on the earlier build; the fullscreen-host candidate has not been reported on iPad yet. The new rotation candidate is compiled but not yet device-tested. |
-| Live Pages source and Cydia refresh | The previous fullscreen-host package was published and its indexes/downloaded package matched SHA256. The iPod rotation candidate is pending publication and device refresh. |
+| Modified real armv7 .deb | rotation + HTTP 403 recovery candidate: `com.heartspread98.opaline.layouttest_0.1.0~layout.20261101152709_iphoneos-arm.deb` (20,026,726 bytes; SHA256 `54b38d79c3335223452fd172fe671f1e8a7fedde7cfd5194bb4307b13c88d615`) |
+| iPod / iPad install and playback | The user installed the preceding fullscreen-host test build on an iPod. Portrait works, but landscape stops both picture and sound and the app will not rotate back. Its private log showed repeated upstream HTTP 403s during fragment priming (10/77 video and 7/40 audio headers fetched), then 403s for both streams during playback after rotation; no player recovery followed. The iPad plays well except that its fullscreen exit button was unresponsive on the earlier build; the fullscreen-host candidate has not been reported on iPad yet. The new recovery candidate is compiled but not yet device-tested. |
+| Live Pages source and Cydia refresh | The rotation-only candidate was published and its indexes/downloaded package matched SHA256. The HTTP 403 recovery candidate is pending publication and device refresh. |
 
 The first package omitted tar directory records. The iPod's Cydia/dpkg failed
 at its first nested file with `unable to create ...Base.lproj/LaunchScreen.storyboard.dpkg-new`.
@@ -101,6 +101,15 @@ iOS 9 test build now hosts the fullscreen view inside the root controller's
 view rather than as a direct `UIWindow` child so UIKit hit-testing follows the
 same view hierarchy as normal playback. This is a candidate fix, not a device
 result. The iPod landscape audio/UI issue also remains unresolved.
+
+The later iPod log narrowed that issue: the old priming burst produced many
+upstream 403s, and new 403s on both media streams after rotation left the
+player without a recovery event. The iOS 9 candidate limits priming to two
+requests at a time, stops after a failed fetch, caps each playback window below
+1 MB, and asks the existing bounded playback recovery to refresh the source
+when the active loopback stream receives 403. These are responses to observed
+failures, not evidence yet that the device now recovers. The raw log contains
+account and video details and stays outside the public repository.
 
 The build used Apple Swift 5.4.2 and the iPhoneOS 14.5 SDK extracted from
 Xcode 12.5.1 into the Windows WSL build environment. A separate minimal UIKit

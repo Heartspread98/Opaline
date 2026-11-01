@@ -67,6 +67,12 @@ extension WatchViewController {
         nc.addObserver(self, selector: #selector(appWillEnterForeground), name: fg, object: nil)
         nc.addObserver(
             self,
+            selector: #selector(loopbackUpstreamForbidden(_:)),
+            name: LegacyLoopbackServer.upstreamForbiddenNotification,
+            object: nil
+        )
+        nc.addObserver(
+            self,
             selector: #selector(queueDidChange),
             name: PlaybackQueue.didChangeNotification,
             object: nil
